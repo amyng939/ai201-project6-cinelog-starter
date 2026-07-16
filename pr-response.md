@@ -16,14 +16,14 @@
 **How I verified:** I ran the test case added to make sure it worked.
 
 ## Comment 4 — Default visibility
-**My position:**
-**Reasoning:**
-**Tradeoff acknowledged:**
+**My position:** I think default visibility should be set to public=False.
+**Reasoning:** Looking at other sites with a watchlist feature, they have it set to private view by default. I think this is a good way of providing privacy for our users as well and it can be their decision to make it public.
+**Tradeoff acknowledged:** Defaulting to private reduces discoverability — users who'd happily share won't, until they find the toggle, so social/sharing features see less engagement out of the box. I'm accepting that cost because accidental over-sharing (a privacy leak) is effectively irreversible, while under-sharing is one click away. The asymmetry favors private.
 
 ## Comment 5 — Sort order
-**My position:**
-**Reasoning:**
-**Engagement with reviewer's point:**
+**My position:** I agree with watchlists to default to "date added" order.
+**Reasoning:** Ordering with date makes the most sense as a watchlist is built out over time and directly relates to the desirability users have with which movies they'd want to see in their watchlist. Newly added movies are the most updated movies they'd like to watch.
+**Engagement with reviewer's point:** I agree with Jamila's point that users want to see what they've added recently as it makes sense for users to want to watch films still fresh in their minds. 
 
 ## Comment 6 — Rebase
 **What conflicted:**
