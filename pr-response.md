@@ -18,7 +18,7 @@
 ## Comment 4 — Default visibility
 **My position:** I think default visibility should be set to public=True.
 **Reasoning:** CineLog's purpose of being a community film tracking app should have public watchlists in order to share and see each other's watchlists and ratings to build on an individuals collection.
-**Tradeoff acknowledged:** 
+**Tradeoff acknowledged:** A user may not realize their list is public, and once something has been seen (or indexed/cached), that exposure can't be fully undone. I'm accepting that cost because CineLog's core value is social sharing, and a private-by-default setting would leave most lists empty-to-others and undercut the feature's purpose.
 
 ## Comment 5 — Sort order
 **My position:** I agree with watchlists to default to "date added" order.
@@ -26,9 +26,9 @@
 **Engagement with reviewer's point:** I agree with Jamila's point that users want to see what they've added recently as it makes sense for users to keep up with what they've most recently watched for real-life senarios as to talk about. 
 
 ## Comment 6 — Rebase
-**What conflicted:**
-**How I resolved it:**
-**How I verified no conflict remains:**
+**What conflicted:** The .gitignore was conflicting but git didn't recognize the UUID conflict.
+**How I resolved it:** I accepted the imcoming changes for .gitignore and asked Claude to help identify what UUID conflicts there were and changed all the old integer IDs to UUID.
+**How I verified no conflict remains:** I was able to continue with the rebase and ran the pytest tests to ensure nothing was broken afterwards.
 
 ## PR Description
 <!-- Written at the end — feature overview, design decisions, manual testing steps -->
