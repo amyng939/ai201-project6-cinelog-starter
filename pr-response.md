@@ -30,5 +30,7 @@
 **How I resolved it:** I accepted the imcoming changes for .gitignore and asked Claude to help identify what UUID conflicts there were and changed all the old integer IDs to UUID.
 **How I verified no conflict remains:** I was able to continue with the rebase and ran the pytest tests to ensure nothing was broken afterwards.
 
+![git log --oneline showing linear history](commits.png)
+
 ## PR Description
 <!-- Written at the end — feature overview, design decisions, manual testing steps -->
