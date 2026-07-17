@@ -1,7 +1,10 @@
 # PR Response Doc — CineLog Watchlist Feature
 
 ## AI Usage
-<!-- Fill in at the end — how you used AI tools during this project -->
+I used Claude (Claude Code) in a few specific ways during this project:
+
+- **Finding the UUID conflict git didn't flag.** After my rebase reported no conflicts, I asked Claude why the UUID migration hadn't shown up. It explained that a clean rebase only means no *textual* conflicts, and that my `WatchlistEntry.film_id` was still `db.Integer` while `Film.id` is a UUID string — a semantic conflict git can't detect. I then changed it to `db.String(36)`.
+- **Understanding interactive rebase.** I used it to understand why `git rebase -i` wasn't showing all my commits (it only lists commits above the base) and how to recover a paused rebase with `git rebase --abort`.
 
 ## Comment 1 — Rename
 **What I did:** I used my editor's find-all-references for save_to_watchlist and renamed them to add_to_watchlist.
@@ -33,4 +36,53 @@
 ![git log --oneline showing linear history](commits.png)
 
 ## PR Description
-<!-- Written at the end — feature overview, design decisions, manual testing steps -->
+
+### What this feature does
+This PR adds a **watchlist** to CineLog — a list of films a user wants to watch later, kept separate from their collection (films already watched). It adds:
+
+- A `WatchlistEntry` model linking a user to a film, with a `date_added` timestamp and a `public` visibility flag.
+- `POST /watchlist/<user_id>/add` — add a film to a user's watchlist. Body: `{ "film_id": "<uuid>" }`.
+- `GET /watchlist/<user_id>` — view a user's watchlist.
+- Service logic in `services/watchlist_service.py` that validates the film exists (`FilmNotFoundError`) and prevents duplicate entries (`AlreadyInWatchlistError`), following the same pattern as the collection service.
+
+### Design decisions
+1. **Visibility default — `public=True`.** New watchlist entries are public by default. CineLog is a community film-tracking app, so being able to see and share each other's watchlists is core to its value; defaulting to public maximizes discovery. The accepted tradeoff is reduced privacy (a user may not realize their list is visible) — mitigated by the per-entry `public` flag, which a user can turn off for any film. (See Comment 4.)
+2. **Sort order — most recently added first.** `get_watchlist()` returns entries ordered by `date_added` descending, mirroring the collection feature, so users see what they most recently added at the top. (See Comment 5.)
+
+### How to manually test
+Prereqs:
+```bash
+pip install -r requirements.txt
+python app.py        # serves http://localhost:5000, SQLite cinelog.db
+```
+
+There's no signup or film-creation endpoint yet, so first seed one user and one film in a Python shell:
+```bash
+python
+>>> from app import create_app, db
+>>> from models import User, Film
+>>> app = create_app()
+>>> with app.app_context():
+...     u = User(username="amy", email="amy@example.com")
+...     f = Film(title="Paddington 2", year=2017, genre="Comedy")
+...     db.session.add_all([u, f]); db.session.commit()
+...     print("USER", u.id); print("FILM", f.id)
+```
+Copy the printed USER and FILM UUIDs, then (PowerShell users: use `curl.exe`):
+
+1. **Add a film** — expect `201` and the entry JSON:
+   ```bash
+   curl.exe -X POST http://localhost:5000/watchlist/<USER_ID>/add -H "Content-Type: application/json" -d "{\"film_id\": \"<FILM_ID>\"}"
+   ```
+2. **View the watchlist** — expect the film, with `date_added` and `public: true`:
+   ```bash
+   curl.exe http://localhost:5000/watchlist/<USER_ID>
+   ```
+3. **Duplicate guard** — run step 1 again with the same film. Expect `409` and an "already in this user's watchlist" error, and only one entry in the list.
+4. **Nonexistent film** — POST a made-up UUID. Expect `404` and a "no film found" error:
+   ```bash
+   curl.exe -X POST http://localhost:5000/watchlist/<USER_ID>/add -H "Content-Type: application/json" -d "{\"film_id\": \"00000000-0000-0000-0000-000000000000\"}"
+   ```
+5. **Sort order** — add a second film, GET the watchlist again, and confirm the most recently added film appears first.
+
+Automated tests: `pytest tests/test_watchlist.py` (deduplication and nonexistent-film cases).
